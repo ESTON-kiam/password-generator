@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Password Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        input, button {
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        #generatedPassword {
+            word-break: break-all;
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin: 15px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Password Generator</h1>
+        <input type="number" id="passwordLength" placeholder="Enter password length" min="4" max="50">
+        <div>
+            <input type="checkbox" id="includeUppercase"> Include Uppercase
+            <input type="checkbox" id="includeLowercase"> Include Lowercase
+            <input type="checkbox" id="includeNumbers"> Include Numbers
+            <input type="checkbox" id="includeSpecial"> Include Special Characters
+        </div>
+        <button onclick="generatePassword()">Generate Password</button>
+        <div id="generatedPassword"></div>
+        <button onclick="copyPassword()">Copy Password</button>
+    </div>
+
+    <script>
+        function generatePassword() {
+            const length = document.getElementById('passwordLength').value;
+            const includeUppercase = document.getElementById('includeUppercase').checked;
+            const includeLowercase = document.getElementById('includeLowercase').checked;
+            const includeNumbers = document.getElementById('includeNumbers').checked;
+            const includeSpecial = document.getElementById('includeSpecial').checked;
+
+            if (!length || length < 4 || length > 50) {
+                alert('Please enter a valid password length (4-50 characters)');
+                return;
+            }
+
+            if (!(includeUppercase || includeLowercase || includeNumbers || includeSpecial)) {
+                alert('Please select at least one character type');
+                return;
+            }
+
+            const uppercaseChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const lowercaseChars = 'abcdefghijklmnopqrstuvwxyz';
+            const numberChars = '0123456789';
+            const specialChars = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+
+            let validChars = '';
+            if (includeUppercase) validChars += uppercaseChars;
+            if (includeLowercase) validChars += lowercaseChars;
+            if (includeNumbers) validChars += numberChars;
+            if (includeSpecial) validChars += specialChars;
+
+            let password = '';
+            for (let i = 0; i < length; i++) {
+                password += validChars.charAt(Math.floor(Math.random() * validChars.length));
+            }
+
+            // Ensure at least one character from each selected type
+            const charTypes = [
+                { chars: uppercaseChars, include: includeUppercase },
+                { chars: lowercaseChars, include: includeLowercase },
+                { chars: numberChars, include: includeNumbers },
+                { chars: specialChars, include: includeSpecial }
+            ];
+
+            charTypes.forEach(type => {
+                if (type.include && !password.split('').some(char => type.chars.includes(char))) {
+                    const replaceIndex = Math.floor(Math.random() * length);
+                    password = password.substring(0, replaceIndex) + 
+                               type.chars.charAt(Math.floor(Math.random() * type.chars.length)) + 
+                               password.substring(replaceIndex + 1);
+                }
+            });
+
+            document.getElementById('generatedPassword').textContent = password;
+        }
+
+        function copyPassword() {
+            const passwordElement = document.getElementById('generatedPassword');
+            const password = passwordElement.textContent;
+
+            if (!password) {
+                alert('No password generated');
+                return;
+            }
+
+            navigator.clipboard.writeText(password).then(() => {
+                alert('Password copied to clipboard!');
+            }).catch(err => {
+                alert('Failed to copy password');
+            });
+        }
+    </script>
+</body>
+</html>
